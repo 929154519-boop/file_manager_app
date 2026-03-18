@@ -18,20 +18,19 @@ jobs:
           flutter-version: '3.22.0'
           channel: 'stable'
 
-      - name: Initialize iOS project
-        run: flutter create . --platforms=ios --no-overwrite
+      # 先删除旧的 ios 目录，重新生成干净的 iOS 项目（避免之前的损坏）
+      - name: Clean and reinitialize iOS project
+        run: |
+          rm -rf ios
+          flutter create . --platforms=ios
 
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Force disable Xcode code signing
-        run: |
-          echo "CODE_SIGNING_ALLOWED = NO;" >> ios/Runner.xcodeproj/project.pbxproj
-          echo "CODE_SIGNING_REQUIRED = NO;" >> ios/Runner.xcodeproj/project.pbxproj
-
+      # 用构建参数绕过签名，不再手动修改项目文件
       - name: Build unsigned IPA
         run: |
-          flutter build ios --release --no-codesign --no-tree-shake-icons
+          flutter build ios --release --no-codesign --no-tree-shake-icons --dart-define=FLUTTER_IOS_SKIP_CODE_SIGNING=1
           cd build/ios/iphoneos
           mkdir -p Payload
           mv Runner.app Payload/

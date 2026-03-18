@@ -7,38 +7,38 @@ env:
 
 jobs:
   build:
-    runs-on: macos-latest  # 使用GitHub当前支持的最新macOS环境
+    runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
-      
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.22.0'  # 稳定版，兼容性最好
+          flutter-version: '3.22.0'
           channel: 'stable'
-          
+
       - name: Initialize iOS project
         run: flutter create . --platforms=ios --no-overwrite
-          
+
       - name: Install dependencies
         run: flutter pub get
-         - name: Disable Xcode code signing
+
+      - name: Force disable Xcode code signing
         run: |
-          # 强制禁用签名
           echo "CODE_SIGNING_ALLOWED = NO;" >> ios/Runner.xcodeproj/project.pbxproj
           echo "CODE_SIGNING_REQUIRED = NO;" >> ios/Runner.xcodeproj/project.pbxproj
-      
-      - name: Build IPA (unsigned)
+
+      - name: Build unsigned IPA
         run: |
           flutter build ios --release --no-codesign --no-tree-shake-icons
           cd build/ios/iphoneos
-          mkdir Payload
+          mkdir -p Payload
           mv Runner.app Payload/
-          zip -r unsigned_ipa.ipa Payload/
-          
-      
-      - name: Upload IPA
+          zip -r unsigned_file_manager.ipa Payload/
+
+      - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
         with:
           name: unsigned-ipa
-          path: build/ios/iphoneos/unsigned_ipa.ipa
+          path: build/ios/iphoneos/unsigned_file_manager.ipa

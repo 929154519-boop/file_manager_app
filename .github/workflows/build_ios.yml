@@ -7,27 +7,29 @@ env:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: macos-13
     steps:
       - uses: actions/checkout@v4
       
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.22.0'
+          flutter-version: '3.16.9'
           channel: 'stable'
-          
-      - name: Initialize iOS project
-        run: flutter create . --platforms=ios  # 自动生成 iOS 目录
           
       - name: Install dependencies
         run: flutter pub get
+      
+      - name: Prebuild iOS
+        run: |
+          flutter precache --ios
+          flutter pub run build_runner clean
       
       - name: Build IPA (unsigned)
         run: |
           flutter build ios --release --no-codesign --no-tree-shake-icons
           cd build/ios/iphoneos
-          mkdir Payload
+          mkdir -p Payload
           mv Runner.app Payload/
           zip -r unsigned_ipa.ipa Payload/
       

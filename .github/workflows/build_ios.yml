@@ -2,6 +2,9 @@ name: Build iOS IPA (Unsigned)
 on:
   workflow_dispatch:
 
+env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
+
 jobs:
   build:
     runs-on: macos-latest
@@ -11,8 +14,11 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
+          flutter-version: '3.22.0'
           channel: 'stable'
+          
+      - name: Initialize iOS project
+        run: flutter create . --platforms=ios  # 自动生成 iOS 目录
           
       - name: Install dependencies
         run: flutter pub get
